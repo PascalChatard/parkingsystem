@@ -16,6 +16,9 @@ public class FareCalculatorService {
         // with-2-decimal precision
         duration = Math.round(duration*100.0)/100.0;
 
+		// Free 30mn parking
+		if (duration <= 0.5)
+			duration = 0.0;        
 
         switch (ticket.getParkingSpot().getParkingType()){
             case CAR: {

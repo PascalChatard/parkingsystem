@@ -1,5 +1,6 @@
 package com.parkit.parkingsystem;
 
+import com.parkit.parkingsystem.constants.Fare;
 import com.parkit.parkingsystem.constants.ParkingType;
 import com.parkit.parkingsystem.dao.ParkingSpotDAO;
 import com.parkit.parkingsystem.dao.TicketDAO;
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,7 +60,8 @@ public class ParkingServiceTest {
 
 	@Test
 	public void processIncomingVehicleForRecurringUserTest() {
-		System.out.println("\n**************************  processIncomingVehicleForRecurringUserTest  **************************");
+		System.out.println(
+				"\n**************************  processIncomingVehicleForRecurringUserTest  **************************");
 		when(inputReaderUtil.readSelection()).thenReturn(1);
 		when(parkingSpotDAO.getNextAvailableSlot(any(ParkingType.class))).thenReturn(1);
 
@@ -97,7 +100,38 @@ public class ParkingServiceTest {
 
 		verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
 		verify(ticketDAO, Mockito.times(1)).updateTicket(any(Ticket.class));
+		assertEquals((Fare.CAR_RATE_PER_HOUR), ticket.getPrice());
+
 		System.out.println("\n**************************  end processExitingVehicleTest  **************************");
+	}
+
+	@Test
+	public void processExitingVehicleRecurringUserTest() {
+		System.out.println(
+				"\n**************************  processExitingVehicleRecurringUserTest  **************************");
+		ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+		Ticket ticket = new Ticket();
+		ticket.setInTime(new Date(System.currentTimeMillis() - (60 * 60 * 1000)));
+		ticket.setParkingSpot(parkingSpot);
+		ticket.setVehicleRegNumber("ABCDEF");
+
+		Ticket oldTicket = new Ticket();
+		oldTicket.setInTime(new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000)));
+		oldTicket.setOutTime(new Date(System.currentTimeMillis() - (22 * 60 * 60 * 1000)));
+		oldTicket.setParkingSpot(parkingSpot);
+		oldTicket.setVehicleRegNumber("ABCDEF");
+		oldTicket.setPrice(32.50);
+		oldTicket.setRecurringUser(true);
+
+		when(ticketDAO.getTicket(anyString())).thenReturn(ticket);
+		when(ticketDAO.getOldTicket(anyString())).thenReturn(oldTicket);
+		when(ticketDAO.updateTicket(any(Ticket.class))).thenReturn(true);
+		parkingService.processExitingVehicle();
+		verify(parkingSpotDAO, Mockito.times(1)).updateParking(any(ParkingSpot.class));
+		verify(ticketDAO, Mockito.times(1)).updateTicket(any(Ticket.class));
+		assertEquals((Fare.CAR_RATE_PER_HOUR * (1 - 0.05)), ticket.getPrice());
+		System.out.println(
+				"\n**************************  end processExitingVehicleRecurringUserTest  **************************");
 	}
 
 }

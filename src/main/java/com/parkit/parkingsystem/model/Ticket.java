@@ -44,19 +44,29 @@ public class Ticket {
     }
 
     public Date getInTime() {
-        return inTime;
+		Date retDate;
+		retDate = this.inTime;
+		return retDate;
     }
 
-    public void setInTime(Date inTime) {
-        this.inTime = inTime;
+    public void setInTime(Date inTimeVal) {
+		if (inTimeVal != null)
+			this.inTime = new Date(inTimeVal.getTime());
+		else
+			this.inTime = null;
     }
 
     public Date getOutTime() {
-        return outTime;
+		Date retDate;
+		retDate = this.outTime;
+		return retDate;
     }
 
-    public void setOutTime(Date outTime) {
-        this.outTime = outTime;
+    public void setOutTime(Date outTimeVal) {
+		if (outTimeVal != null)
+			this.outTime = new Date(outTimeVal.getTime());
+		else
+			this.outTime = null;
     }
     
     public boolean getRecurringUser() {
